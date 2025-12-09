@@ -2,7 +2,7 @@ import requests
 import geopandas as gp
 import os
 import tempfile
-import appdirs
+import platformdirs
 import pandas as pd
 import re
 import ftplib
@@ -60,7 +60,7 @@ def _load_tiger(url, cache=False, subset_by=None, protocol="http", timeout=1800)
     
     # Determine where to save the file
     if cache:
-        cache_dir = appdirs.user_cache_dir("pygris")
+        cache_dir = platformdirs.user_cache_dir("pygris")
         if not os.path.isdir(cache_dir):
             os.makedirs(cache_dir)
         basename = os.path.basename(url)
