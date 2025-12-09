@@ -13,6 +13,15 @@ pip install pygris
 # pip install pygris[explore]
 ```
 
+Or via `conda-forge` with:
+
+```bash
+conda install pygris
+
+# For optional dependencies to support interactive examples in the documentation:
+# conda install "pygris[explore]"
+```
+
 Alternatively, install the development version from GitHub:
 
 ```bash
