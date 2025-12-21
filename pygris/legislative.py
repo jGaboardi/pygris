@@ -2,7 +2,8 @@
 
 __author__ = "Kyle Walker <kyle@walker-data.com"
 
-from pygris.helpers import _load_tiger, validate_state, validate_county
+import pandas as pd
+from pygris.helpers import _load_tiger, validate_state, validate_county, fips_codes
 
 def congressional_districts(state = None, cb = False, resolution = "500k", year = None,
                             cache = False, subset_by = None, protocol = "http", timeout = 1800):
@@ -93,21 +94,62 @@ def congressional_districts(state = None, cb = False, resolution = "500k", year 
         raise ValueError(f"Congressional districts are not available from pygris for {year}.")
 
     if cb:
+        # Cartographic boundary files are still available as national files
         if year == 2013:
             url = f"https://www2.census.gov/geo/tiger/GENZ{year}/cb_{year}_us_cd{congress}_{resolution}.zip"
         else:
             url = f"https://www2.census.gov/geo/tiger/GENZ{year}/shp/cb_{year}_us_cd{congress}_{resolution}.zip"
+
+        cds = _load_tiger(url, cache = cache, subset_by = subset_by, protocol = protocol, timeout = timeout)
+
+        if state is not None:
+            if type(state) is not list:
+                state = [state]
+            valid_state = [validate_state(x) for x in state]
+            cds = cds.query('STATEFP in @valid_state')
     else:
-        url = f"https://www2.census.gov/geo/tiger/TIGER{year}/CD/tl_{year}_us_cd{congress}.zip"
+        # TIGER/Line files: 2024+ are state-specific, earlier years are national
+        if year >= 2024:
+            if state is not None:
+                # Download specific state(s)
+                if type(state) is not list:
+                    state = [state]
+                valid_states = [validate_state(x) for x in state]
 
+                cds_list = []
+                for st in valid_states:
+                    url = f"https://www2.census.gov/geo/tiger/TIGER{year}/CD/tl_{year}_{st}_cd{congress}.zip"
+                    cds_state = _load_tiger(url, cache = cache, subset_by = subset_by, protocol = protocol, timeout = timeout)
+                    cds_list.append(cds_state)
 
-    cds = _load_tiger(url, cache = cache, subset_by = subset_by, protocol = protocol, timeout = timeout)
+                cds = pd.concat(cds_list, ignore_index = True)
+            else:
+                # Download all states
+                print("Downloading congressional districts for all states...")
+                all_fips = fips_codes()
+                state_fips = all_fips['state_code'].unique()
 
-    if state is not None:
-        if type(state) is not list:
-            state = [state]
-        valid_state = [validate_state(x) for x in state]
-        cds = cds.query('STATEFP in @valid_state')
+                cds_list = []
+                for st in state_fips:
+                    try:
+                        url = f"https://www2.census.gov/geo/tiger/TIGER{year}/CD/tl_{year}_{st}_cd{congress}.zip"
+                        cds_state = _load_tiger(url, cache = cache, subset_by = subset_by, protocol = protocol, timeout = timeout)
+                        cds_list.append(cds_state)
+                    except Exception:
+                        # Some states/territories may not have congressional districts
+                        pass
+
+                cds = pd.concat(cds_list, ignore_index = True)
+        else:
+            # Pre-2024: national file available
+            url = f"https://www2.census.gov/geo/tiger/TIGER{year}/CD/tl_{year}_us_cd{congress}.zip"
+            cds = _load_tiger(url, cache = cache, subset_by = subset_by, protocol = protocol, timeout = timeout)
+
+            if state is not None:
+                if type(state) is not list:
+                    state = [state]
+                valid_state = [validate_state(x) for x in state]
+                cds = cds.query('STATEFP in @valid_state')
 
     return cds
 
