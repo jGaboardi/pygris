@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 import numpy as np
-import appdirs
+import platformdirs
 import os
 from pygris.enumeration_units import states, counties, tracts, block_groups, blocks
 from pygris.geometry import _get_geometry
@@ -214,7 +214,7 @@ def get_lodes(state, year, version = "LODES8", lodes_type = "od", part = "main",
         lodes_data = pd.read_csv(url)
         
     else:
-        cache_dir = appdirs.user_cache_dir("pygris")
+        cache_dir = platformdirs.user_cache_dir("pygris")
 
         if not os.path.isdir(cache_dir):
             os.mkdir(cache_dir) 
@@ -450,7 +450,7 @@ def get_xwalk(state, version = "LODES8", cache = False):
         xwalk_data = pd.read_csv(url, dtype="object")
         
     else:
-        cache_dir = appdirs.user_cache_dir("pygris")
+        cache_dir = platformdirs.user_cache_dir("pygris")
 
         if not os.path.isdir(cache_dir):
             os.mkdir(cache_dir) 
