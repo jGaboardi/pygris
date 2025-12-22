@@ -193,7 +193,16 @@ def tracts(state = None, county = None, cb = False, year = None, cache = False, 
         if type(county) is not list:
             county = [county]
         valid_county = [validate_county(state, x) for x in county]
-        trcts = trcts.query('COUNTYFP in @valid_county')
+
+        # Column name varies by year
+        if year in [2000, 2008, 2009]:
+            county_col = 'COUNTYFP00'
+        elif year == 2010:
+            county_col = 'COUNTYFP10'
+        else:
+            county_col = 'COUNTYFP'
+
+        trcts = trcts.query(f'{county_col} in @valid_county')
 
     return trcts
 
