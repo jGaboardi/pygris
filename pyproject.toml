@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pygris"
-version = "0.2.0"
+version = "0.2.1"
 authors = [{ name = "Kyle Walker", email = "kyle@walker-data.com" }]
 description = "Download and use US Census Bureau TIGER/Line Shapefiles and other data resources in Python"
 readme = "README.md"

@@ -681,8 +681,11 @@ def zctas(cb = False, starts_with = None, year = None, state = None, cache = Fal
                 url = f"https://www2.census.gov/geo/tiger/PREVGENZ/zt/z500shp/zt{state}_d00_shp.zip"
         elif year == 2010:
             url = "https://www2.census.gov/geo/tiger/GENZ2010/gz_2010_us_860_00_500k.zip"
-        elif year >= 2020:
-            url = f"https://www2.census.gov/geo/tiger/GENZ{year}/shp/cb_{year}_us_zcta520_500k.zip"
+        elif year == 2020:
+            url = "https://www2.census.gov/geo/tiger/GENZ2020/shp/cb_2020_us_zcta520_500k.zip"
+        elif year > 2020:
+            raise ValueError(f"Cartographic boundary ZCTA files are only available for 2020. "
+                           f"Use cb=False to get TIGER/Line ZCTAs for {year}, or set year=2020 for the CB file.")
         else:
             if year == 2013:
                 url = f"https://www2.census.gov/geo/tiger/GENZ{year}/cb_{year}_us_zcta510_500k.zip"
