@@ -227,7 +227,39 @@ def validate_state(state, quiet = False):
                 print(f"Using FIPS code '{state_fips}' for input '{original_input}'")
             
             return state_fips
-            
+
+def get_state_name(state, quiet = False):
+    """
+    Get the state name from a FIPS code.
+
+    Parameters
+    ----------
+    state : str
+        The two-digit FIPS code of the state.
+    quiet : bool
+        If True, suppress printed output.
+
+    Returns
+    -------
+    str: The state name.
+    """
+    original_input = state
+    state = state.lower().strip()
+
+    # Get the FIPS codes dataset
+    fips = fips_codes()
+    state_sub = fips.query('state_code == @state')
+
+    if state_sub.shape[0] == 0:
+        raise ValueError("You have likely entered an invalid state code, please revise.")
+    else:
+        state_name = state_sub.state_name.unique()[0]
+
+        if not quiet:
+            print(f"Using state name '{state_name}' for input '{original_input}'")
+
+        return state_name
+
 def validate_county(state, county, quiet = False):
     state = validate_state(state)
 
